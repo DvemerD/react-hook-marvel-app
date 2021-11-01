@@ -1,53 +1,35 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import Skeleton from '../skeleton/Skeleton';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Spinner from '../spinner/Spinner'
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 import './charInfo.scss';
 
 const CharInfo = (props) => {
     const [char, setChar] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-
-    const marvelService = new MarvelService;
+    
+    const { loading, error, getCharacter, clearError } = useMarvelService();
 
     useEffect(() => {
         updateChar();
-        console.log('mount');
-    }, []);
-
-    useEffect(() => {
-        updateChar();
-        console.log('update');
     }, [props.charId]);
-
-    const onError = () => {
-        setError(true);
-        setLoading(false);
-    }
-
-    const onCharLoading = () => {
-        setLoading(true);
-    }
 
     const onCharLoaded = (char) => {
         setChar(char);
-        setLoading(false);
     }
 
     const updateChar = () => {
         if (!props.charId) {
             return;
         }
-        onCharLoading();
-        marvelService
-            .getCharacter(props.charId)
+
+        clearError();
+        getCharacter(props.charId)
             .then(onCharLoaded)
-            .catch(onError);
     }
 
     const skeleton = char || loading || error ? null : <Skeleton />;
@@ -63,13 +45,13 @@ const CharInfo = (props) => {
             {skeleton}
         </div>
     )
-    
+
 }
 
 const View = ({ char }) => {
     const { name, description, thumbnail, homepage, wiki, comics } = char;
     const imgNotAvi = /image_not_available/.test(thumbnail);
-
+      
     return (
         <>
             <div className="char__basics">
@@ -94,11 +76,13 @@ const View = ({ char }) => {
             <ul className="char__comics-list">
                 {comics.length > 0 ? null : "There is no comics with this character."}
                 {comics.map((item, i) => {
-                    if (i > 10) return; 
-
+                    const comicId = item.resourceURI.substr(43);
+                    if (i > 10) return;
                     return (
                         <li key={i} className="char__comics-item">
-                            {item.name}
+                            <Link to={`/comics/${comicId}`}>
+                                {item.name}
+                            </Link>
                         </li>
                     )
                 })}
