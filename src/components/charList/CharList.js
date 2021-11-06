@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import PropTypes from 'prop-types';
 
 import Spinner from '../spinner/Spinner';
@@ -13,7 +14,7 @@ const CharList = (props) => {
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
 
-    const {loading, error, getAllCharacters} = useMarvelService();
+    const { loading, error, getAllCharacters } = useMarvelService();
 
     useEffect(() => {
         onRequest(offset, true);
@@ -57,27 +58,32 @@ const CharList = (props) => {
             const imgNotAvi = /image_not_available/.test(thumbnail);
 
             return (
-                <li key={id} 
-                    ref = {elem => refChars.current[i] = elem}
-                    className="char__item"
-                    tabIndex={0}
-                    onClick={() => {
-                        props.onCharSelected(id);
-                        onFocusItem(i)}}>
-                    <img src={thumbnail} alt={`Character ${name}`}
-                        style={imgNotAvi ? { objectFit: 'unset' } : null} />
-                    <div className="char__name">{name}</div>
-                </li>
+                <CSSTransition key={item.id} timeout={500} classNames="char__item">
+                    <li key={id}
+                        ref={elem => refChars.current[i] = elem}
+                        className="char__item"
+                        tabIndex={0}
+                        onClick={() => {
+                            props.onCharSelected(id);
+                            onFocusItem(i)
+                        }}>
+                        <img src={thumbnail} alt={`Character ${name}`}
+                            style={imgNotAvi ? { objectFit: 'unset' } : null} />
+                        <div className="char__name">{name}</div>
+                    </li>
+                </CSSTransition>
             )
         });
 
         return (
             <ul className="char__grid">
-                {items}
+                <TransitionGroup component={null}>
+                    {items}
+                </TransitionGroup>
             </ul>
         )
     }
-    
+
     const items = viewCharacters(chars);
 
     const errorMessage = error ? <ErrorMessage /> : null;
@@ -91,12 +97,12 @@ const CharList = (props) => {
             <button
                 className="button button__main button__long"
                 disabled={newItemLoading}
-                style={{'display': charEnded ? 'none' : 'block'}}
+                style={{ 'display': charEnded ? 'none' : 'block' }}
                 onClick={() => onRequest(offset)}>
                 <div className="inner">load more</div>
             </button>
         </div>
-    )   
+    )
 }
 
 CharList.propTypes = {
