@@ -36,8 +36,8 @@ const SingleComicPage = () => {
     )
 }
 
-const View = ({ comic }) => {
-    const {title, description, pageCount, thumbnail, price, language } = comic;
+const View = ({ data }) => {
+    const {title, description, pageCount, thumbnail, price, language } = data;
 
     return (
         <div className="single-comic">
