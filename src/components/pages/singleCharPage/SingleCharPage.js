@@ -2,8 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 
-import ErrorMessage from '../../errorMessage/ErrorMessage';
-import Spinner from '../../spinner/Spinner';
+import setContent from '../../../utils/setContent';
 import useMarvelService from '../../../services/MarvelService';
 
 import './singleCharPage.scss';
@@ -12,7 +11,7 @@ const SingleCharPage = () => {
     const [char, setChar] = useState(null);
     const { charName } = useParams();
 
-    const { loading, error, getNameCharacter, clearError } = useMarvelService();
+    const { getNameCharacter, clearError, process, setProcess } = useMarvelService();
 
     useEffect(() => {
         updateChar();
@@ -26,23 +25,18 @@ const SingleCharPage = () => {
         clearError();
         getNameCharacter(charName)
             .then(onCharLoaded)
+            .then(() => setProcess('confirmed'));
     }
-
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error || !char) ? <View char={char} /> : null;
 
     return (
         <>
-            {errorMessage}
-            {spinner}
-            {content}
+            {setContent(process, View, char)}
         </>
     )
 }
 
-const View = ({ char }) => {
-    const { name, description, thumbnail } = char[0];
+const View = ({ data }) => {
+    const { name, description, thumbnail } = data[0];
 
     return (
         <div className="single-char">

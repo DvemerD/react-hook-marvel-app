@@ -2,8 +2,7 @@ import { useParams, Link} from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 
-import ErrorMessage from '../../errorMessage/ErrorMessage';
-import Spinner from '../../spinner/Spinner'
+import setContent from '../../../utils/setContent';
 import useMarvelService from '../../../services/MarvelService';
 
 
@@ -13,7 +12,7 @@ const SingleComicPage = () => {
     const [comic, setComic] = useState(null);
     const { comicId } = useParams();
     
-    const { loading, error, getComic, clearError } = useMarvelService();
+    const { getComic, clearError, process, setProcess } = useMarvelService();
 
     useEffect(() => {
         updateComic();
@@ -26,18 +25,13 @@ const SingleComicPage = () => {
     const updateComic = () => {
         clearError();
         getComic(comicId)
-            .then(onComicLoaded);
+            .then(onComicLoaded)
+            .then(() => setProcess('confirmed'));
     }
-
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error || !comic) ? <View comic={comic} /> : null;
 
     return (
         <>
-            {errorMessage}
-            {spinner}
-            {content}
+            {setContent(process, View, comic)}
         </>    
     )
 }
